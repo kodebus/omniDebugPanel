@@ -1,0 +1,91 @@
+<template>
+    <div style="border:1px solid #0F6E56; border-radius:8px; overflow:hidden; margin:8px 0; font-family:'Salesforce Sans',sans-serif; font-size:13px;">
+
+        <!-- Header -->
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#1D9E75; color:#E1F5EE; cursor:pointer;" onclick={toggleExpanded}>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div>
+                    <div style="font-weight:500; font-size:13px;">⚙ OmniScript debug panel</div>
+                    <div style="font-size:11px; color:#9FE1CB; margin-top:2px;">Step: {currentStepLabel}</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button style="background:rgba(255,255,255,0.15); border:none; border-radius:4px; padding:4px 10px; color:#E1F5EE; cursor:pointer; font-size:11px;" onclick={handleCopyJson}>{copyLabel}</button>
+                <span style="font-size:12px; color:#9FE1CB;">{chevronIcon}</span>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <template if:true={isExpanded}>
+            <div style="background:#ffffff;">
+
+                <!-- Section label -->
+                <div style="font-size:11px; font-weight:500; color:#5F5E5A; padding:8px 14px; text-transform:uppercase; letter-spacing:0.05em; background:#F1EFE8; border-bottom:0.5px solid #D3D1C7;">
+                    Step elements &amp; resolved values
+                </div>
+
+                <!-- Elements table -->
+                <template if:true={hasElements}>
+                    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                        <thead>
+                            <tr style="background:#F1EFE8;">
+                                <th style="width:25%; font-size:11px; font-weight:500; color:#5F5E5A; text-align:left; padding:6px 14px; border-bottom:0.5px solid #D3D1C7;">API name</th>
+                                <th style="width:40%; font-size:11px; font-weight:500; color:#5F5E5A; text-align:left; padding:6px 14px; border-bottom:0.5px solid #D3D1C7;">Expression</th>
+                                <th style="width:35%; font-size:11px; font-weight:500; color:#5F5E5A; text-align:left; padding:6px 14px; border-bottom:0.5px solid #D3D1C7;">Current value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={stepElements} for:item="el">
+                                <tr key={el.apiName}>
+                                    <!-- API name -->
+                                    <td style="padding:7px 14px; border-bottom:0.5px solid #F1EFE8; vertical-align:top; word-break:break-word;">
+                                        <span style="font-family:'Courier New',monospace; font-size:12px; color:#0F6E56;">{el.apiName}</span>
+                                    </td>
+
+                                    <!-- Expression -->
+                                    <td style="padding:7px 14px; border-bottom:0.5px solid #F1EFE8; vertical-align:top;">
+                                        <span style="display:inline-block; font-family:'Courier New',monospace; font-size:11px; background:#FAEEDA; color:#633806; border-radius:4px; padding:2px 6px;">
+                                            {el.expression}
+                                        </span>
+                                    </td>
+
+                                    <!-- Value -->
+                                    <td style="padding:7px 14px; border-bottom:0.5px solid #F1EFE8; vertical-align:top; word-break:break-word;">
+                                        <template if:true={el.isNull}>
+                                            <span style="color:#888780; font-style:italic;">null / empty</span>
+                                        </template>
+                                        <template if:true={el.isBoolTrue}>
+                                            <span style="font-family:'Courier New',monospace; font-size:12px; color:#3B6D11; font-weight:500;">true</span>
+                                        </template>
+                                        <template if:true={el.isBoolFalse}>
+                                            <span style="font-family:'Courier New',monospace; font-size:12px; color:#993C1D; font-weight:500;">false</span>
+                                        </template>
+                                        <template if:true={el.isString}>
+                                            <span style="font-family:'Courier New',monospace; font-size:12px; color:#185FA5;">"{el.displayValue}"</span>
+                                        </template>
+                                        <template if:true={el.isObject}>
+                                            <span data-apiname={el.apiName} onclick={toggleObject} style="font-family:'Courier New',monospace; font-size:11px; color:#185FA5; cursor:pointer; text-decoration:underline; text-decoration-style:dotted;">
+                                                <template if:false={el.isObjectExpanded}>{el.objectSummary}</template>
+                                                <template if:true={el.isObjectExpanded}>{ collapse }</template>
+                                            </span>
+                                            <template if:true={el.isObjectExpanded}>
+                                                <pre style="margin:6px 0 0; padding:8px; font-family:'Courier New',monospace; font-size:11px; color:#2C2C2A; background:#F1EFE8; border-radius:4px; overflow-x:auto; white-space:pre; line-height:1.5;">{el.displayValue}</pre>
+                                            </template>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+
+                <template if:false={hasElements}>
+                    <div style="padding:16px 14px; color:#888780; font-style:italic; font-size:13px;">No data found for step "{currentStepName}".</div>
+                </template>
+
+
+
+            </div>
+        </template>
+    </div>
+</template>
